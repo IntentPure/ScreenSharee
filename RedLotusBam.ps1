@@ -1,72 +1,50 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# ================= CLICK + KEY =================
-
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
 
 public class Native {
     [DllImport("user32.dll")]
-    static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
-
-    [DllImport("user32.dll")]
     public static extern short GetAsyncKeyState(int vKey);
 
-    [StructLayout(LayoutKind.Sequential)]
-    struct INPUT {
-        public uint type;
-        public MOUSEINPUT mi;
-    }
+    [DllImport("user32.dll")]
+    public static extern void mouse_event(uint flags, uint dx, uint dy, uint data, UIntPtr extra);
 
-    [StructLayout(LayoutKind.Sequential)]
-    struct MOUSEINPUT {
-        public int dx;
-        public int dy;
-        public uint mouseData;
-        public uint dwFlags;
-        public uint time;
-        public IntPtr dwExtraInfo;
-    }
+    public const int VK_LBUTTON = 0x01;
+    public const int VK_RBUTTON = 0x02;
 
-    const uint INPUT_MOUSE = 0;
-    const uint LEFTDOWN = 0x0002;
-    const uint LEFTUP   = 0x0004;
-    const uint RIGHTDOWN = 0x0008;
-    const uint RIGHTUP   = 0x0010;
-
-    public static void LeftClick() {
-        INPUT[] i = new INPUT[2];
-        i[0].type = INPUT_MOUSE;
-        i[0].mi.dwFlags = LEFTDOWN;
-        i[1].type = INPUT_MOUSE;
-        i[1].mi.dwFlags = LEFTUP;
-        SendInput(2, i, Marshal.SizeOf(typeof(INPUT)));
-    }
-
-    public static void RightClick() {
-        INPUT[] i = new INPUT[2];
-        i[0].type = INPUT_MOUSE;
-        i[0].mi.dwFlags = RIGHTDOWN;
-        i[1].type = INPUT_MOUSE;
-        i[1].mi.dwFlags = RIGHTUP;
-        SendInput(2, i, Marshal.SizeOf(typeof(INPUT)));
-    }
+    public const uint LEFTDOWN = 0x0002;
+    public const uint LEFTUP   = 0x0004;
+    public const uint RIGHTDOWN = 0x0008;
+    public const uint RIGHTUP   = 0x0010;
 
     public static bool IsDown(int key) {
         return (GetAsyncKeyState(key) & 0x8000) != 0;
+    }
+
+    public static void LeftClick() {
+        mouse_event(LEFTDOWN,0,0,0,UIntPtr.Zero);
+        mouse_event(LEFTUP,0,0,0,UIntPtr.Zero);
+    }
+
+    public static void RightClick() {
+        mouse_event(RIGHTDOWN,0,0,0,UIntPtr.Zero);
+        mouse_event(RIGHTUP,0,0,0,UIntPtr.Zero);
     }
 }
 "@
 
 # ================= STATE =================
 
-$global:leftEnabled = $false
-$global:rightEnabled = $false
-$global:leftCPS = 10
-$global:rightCPS = 10
-$global:running = $true
+$leftEnabled = $false
+$rightEnabled = $false
+$leftCPS = 10
+$rightCPS = 10
+
+$leftStopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+$rightStopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
 # ================= FORM =================
 
@@ -77,7 +55,7 @@ $form.StartPosition = "CenterScreen"
 $form.TopMost = $true
 $form.KeyPreview = $true
 
-# Left UI
+# LEFT UI
 $leftLabel = New-Object System.Windows.Forms.Label
 $leftLabel.Text = "Left CPS:"
 $leftLabel.Top = 20
@@ -99,7 +77,7 @@ $leftSlider.Left = 20
 $leftSlider.Top = 45
 $form.Controls.Add($leftSlider)
 
-# Right UI
+# RIGHT UI
 $rightLabel = New-Object System.Windows.Forms.Label
 $rightLabel.Text = "Right CPS:"
 $rightLabel.Top = 110
@@ -131,13 +109,13 @@ $form.Controls.Add($status)
 # ================= SLIDER EVENTS =================
 
 $leftSlider.Add_ValueChanged({
-    $global:leftCPS = $leftSlider.Value
-    $leftValue.Text = $global:leftCPS
+    $leftCPS = $leftSlider.Value
+    $leftValue.Text = $leftCPS
 })
 
 $rightSlider.Add_ValueChanged({
-    $global:rightCPS = $rightSlider.Value
-    $rightValue.Text = $global:rightCPS
+    $rightCPS = $rightSlider.Value
+    $rightValue.Text = $rightCPS
 })
 
 # ================= TOGGLE KEYS =================
@@ -145,51 +123,35 @@ $rightSlider.Add_ValueChanged({
 $form.Add_KeyDown({
 
     if ($_.KeyCode -eq "F6") {
-        $global:leftEnabled = -not $global:leftEnabled
-        $status.Text = "Left: $($global:leftEnabled) | Right: $($global:rightEnabled)"
+        $leftEnabled = -not $leftEnabled
+        $status.Text = "Left: $leftEnabled | Right: $rightEnabled"
     }
 
     if ($_.KeyCode -eq "F7") {
-        $global:rightEnabled = -not $global:rightEnabled
-        $status.Text = "Left: $($global:leftEnabled) | Right: $($global:rightEnabled)"
+        $rightEnabled = -not $rightEnabled
+        $status.Text = "Left: $leftEnabled | Right: $rightEnabled"
     }
 
 })
 
-$form.Add_FormClosing({
-    $global:running = $false
-})
+# ================= MAIN LOOP (Reliable) =================
 
-# ================= HIGH PRECISION CLICK LOOP =================
+[System.Windows.Forms.Application]::Add_Idle({
 
-$job = [System.Threading.Tasks.Task]::Run({
-
-    $leftTimer = [System.Diagnostics.Stopwatch]::StartNew()
-    $rightTimer = [System.Diagnostics.Stopwatch]::StartNew()
-
-    while ($global:running) {
-
-        if ($global:leftEnabled -and [Native]::IsDown(0x01)) {
-
-            $interval = 1000 / $global:leftCPS
-
-            if ($leftTimer.ElapsedMilliseconds -ge $interval) {
-                [Native]::LeftClick()
-                $leftTimer.Restart()
-            }
+    if ($leftEnabled -and [Native]::IsDown(0x01)) {
+        $interval = 1000 / $leftCPS
+        if ($leftStopwatch.ElapsedMilliseconds -ge $interval) {
+            [Native]::LeftClick()
+            $leftStopwatch.Restart()
         }
+    }
 
-        if ($global:rightEnabled -and [Native]::IsDown(0x02)) {
-
-            $interval = 1000 / $global:rightCPS
-
-            if ($rightTimer.ElapsedMilliseconds -ge $interval) {
-                [Native]::RightClick()
-                $rightTimer.Restart()
-            }
+    if ($rightEnabled -and [Native]::IsDown(0x02)) {
+        $interval = 1000 / $rightCPS
+        if ($rightStopwatch.ElapsedMilliseconds -ge $interval) {
+            [Native]::RightClick()
+            $rightStopwatch.Restart()
         }
-
-        Start-Sleep -Milliseconds 1
     }
 
 })
