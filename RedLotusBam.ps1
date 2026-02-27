@@ -29,8 +29,8 @@ public class InputSimulator {
     }
 
     const uint INPUT_MOUSE = 0;
-    const uint LEFTDOWN = 0x0002;
-    const uint LEFTUP   = 0x0004;
+    const uint LEFTDOWN  = 0x0002;
+    const uint LEFTUP    = 0x0004;
     const uint RIGHTDOWN = 0x0008;
     const uint RIGHTUP   = 0x0010;
 
@@ -55,32 +55,88 @@ public class InputSimulator {
 "@
 }
 
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+
+public class KeyState {
+    [DllImport("user32.dll")]
+    public static extern short GetAsyncKeyState(int vKey);
+
+    public static bool IsDown(int key) {
+        return (GetAsyncKeyState(key) & 0x8000) != 0;
+    }
+}
+"@
+
 # ================= STATE =================
 
-$leftActive = $false
-$rightActive = $false
-$leftCPS = 10
-$rightCPS = 10
+$global:leftEnabled = $false
+$global:rightEnabled = $false
+$global:leftCPS = 10
+$global:rightCPS = 10
 
 # ================= FORM =================
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "Sneaky Clicker"
-$form.Size = New-Object System.Drawing.Size(280,200)
+$form.Size = New-Object System.Drawing.Size(350,260)
 $form.StartPosition = "CenterScreen"
 $form.TopMost = $true
 $form.KeyPreview = $true
 
-# Labels
-$label = New-Object System.Windows.Forms.Label
-$label.Text = "F1 = Left | F2 = Right"
-$label.Dock = "Top"
-$label.TextAlign = "MiddleCenter"
-$form.Controls.Add($label)
+# -------- LEFT SECTION --------
+
+$leftLabel = New-Object System.Windows.Forms.Label
+$leftLabel.Text = "Left CPS:"
+$leftLabel.Top = 20
+$leftLabel.Left = 20
+$form.Controls.Add($leftLabel)
+
+$leftValue = New-Object System.Windows.Forms.Label
+$leftValue.Text = "10"
+$leftValue.Top = 20
+$leftValue.Left = 100
+$form.Controls.Add($leftValue)
+
+$leftSlider = New-Object System.Windows.Forms.TrackBar
+$leftSlider.Minimum = 1
+$leftSlider.Maximum = 50
+$leftSlider.Value = 10
+$leftSlider.Width = 280
+$leftSlider.Left = 20
+$leftSlider.Top = 45
+$form.Controls.Add($leftSlider)
+
+# -------- RIGHT SECTION --------
+
+$rightLabel = New-Object System.Windows.Forms.Label
+$rightLabel.Text = "Right CPS:"
+$rightLabel.Top = 110
+$rightLabel.Left = 20
+$form.Controls.Add($rightLabel)
+
+$rightValue = New-Object System.Windows.Forms.Label
+$rightValue.Text = "10"
+$rightValue.Top = 110
+$rightValue.Left = 100
+$form.Controls.Add($rightValue)
+
+$rightSlider = New-Object System.Windows.Forms.TrackBar
+$rightSlider.Minimum = 1
+$rightSlider.Maximum = 50
+$rightSlider.Value = 10
+$rightSlider.Width = 280
+$rightSlider.Left = 20
+$rightSlider.Top = 135
+$form.Controls.Add($rightSlider)
+
+# -------- STATUS --------
 
 $status = New-Object System.Windows.Forms.Label
-$status.Text = "Idle"
+$status.Text = "F6 = Toggle Left | F7 = Toggle Right"
 $status.Dock = "Bottom"
+$status.Height = 30
 $status.TextAlign = "MiddleCenter"
 $form.Controls.Add($status)
 
@@ -90,44 +146,56 @@ $leftTimer = New-Object System.Windows.Forms.Timer
 $rightTimer = New-Object System.Windows.Forms.Timer
 
 $leftTimer.Add_Tick({
-    [InputSimulator]::LeftClick()
+    if ($global:leftEnabled -and [KeyState]::IsDown(0x01)) {
+        [InputSimulator]::LeftClick()
+    }
 })
 
 $rightTimer.Add_Tick({
-    [InputSimulator]::RightClick()
+    if ($global:rightEnabled -and [KeyState]::IsDown(0x02)) {
+        [InputSimulator]::RightClick()
+    }
 })
 
-# ================= HOTKEY HANDLING =================
+# ================= EVENTS =================
+
+$leftSlider.Add_ValueChanged({
+    $global:leftCPS = $leftSlider.Value
+    $leftValue.Text = $global:leftCPS
+    $leftTimer.Interval = [math]::Max(1,[int](1000 / $global:leftCPS))
+})
+
+$rightSlider.Add_ValueChanged({
+    $global:rightCPS = $rightSlider.Value
+    $rightValue.Text = $global:rightCPS
+    $rightTimer.Interval = [math]::Max(1,[int](1000 / $global:rightCPS))
+})
 
 $form.Add_KeyDown({
 
-    if ($_.KeyCode -eq "F1") {
-
-        $leftActive = -not $leftActive
-
-        if ($leftActive) {
-            $leftTimer.Interval = [math]::Max(1,[int](1000 / $leftCPS))
+    if ($_.KeyCode -eq "F6") {
+        $global:leftEnabled = -not $global:leftEnabled
+        if ($global:leftEnabled) {
+            $leftTimer.Interval = [math]::Max(1,[int](1000 / $global:leftCPS))
             $leftTimer.Start()
-            $status.Text = "Left Clicking ON"
+            $status.Text = "Left ENABLED (Hold Left Mouse)"
         }
         else {
             $leftTimer.Stop()
-            $status.Text = "Left Clicking OFF"
+            $status.Text = "Left DISABLED"
         }
     }
 
-    if ($_.KeyCode -eq "F2") {
-
-        $rightActive = -not $rightActive
-
-        if ($rightActive) {
-            $rightTimer.Interval = [math]::Max(1,[int](1000 / $rightCPS))
+    if ($_.KeyCode -eq "F7") {
+        $global:rightEnabled = -not $global:rightEnabled
+        if ($global:rightEnabled) {
+            $rightTimer.Interval = [math]::Max(1,[int](1000 / $global:rightCPS))
             $rightTimer.Start()
-            $status.Text = "Right Clicking ON"
+            $status.Text = "Right ENABLED (Hold Right Mouse)"
         }
         else {
             $rightTimer.Stop()
-            $status.Text = "Right Clicking OFF"
+            $status.Text = "Right DISABLED"
         }
     }
 
