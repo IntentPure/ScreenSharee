@@ -2,8 +2,8 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 Write-Host @"
-Made with love by lily<3
-"@ -ForegroundColor Cyan
+Made with love by lily<3 (Edited a bit by kastris)
+"@ -ForegroundColor Red
 
 if (-not ([System.Management.Automation.PSTypeName]'Win32').Type) {
     Add-Type @"
@@ -59,12 +59,12 @@ function Invoke-Click {
 
 # Main Form
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Lilith Clicker"
+$form.Text = "Lilith x kastris Clicker"
 $form.Size = New-Object System.Drawing.Size(420, 520)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "None"
 $form.BackColor = [System.Drawing.Color]::FromArgb(32, 32, 32)
-$form.ForeColor = [System.Drawing.Color]::White
+$form.ForeColor = [System.Drawing.Color]::Red
 
 # Variables for dragging
 $script:isDragging = $false
@@ -86,7 +86,7 @@ $form.Controls.Add($titleBar)
 $titleBarLabel = New-Object System.Windows.Forms.Label
 $titleBarLabel.Location = New-Object System.Drawing.Point(10, 0)
 $titleBarLabel.Size = New-Object System.Drawing.Size(300, 35)
-$titleBarLabel.Text = "Lilith Clicker"
+$titleBarLabel.Text = "Lilith x kastris Clicker"
 $titleBarLabel.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
 $titleBarLabel.ForeColor = [System.Drawing.Color]::FromArgb(180, 180, 180)
 $titleBarLabel.TextAlign = "MiddleLeft"
@@ -470,3 +470,4 @@ $form.Add_FormClosing({
 
 $form.Add_Shown({$form.Activate()})
 [void]$form.ShowDialog()
+
