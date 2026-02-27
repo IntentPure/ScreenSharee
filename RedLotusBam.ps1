@@ -1,8 +1,10 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+# ================= NATIVE CLICK =================
+
 if (-not ([System.Management.Automation.PSTypeName]'InputSimulator').Type) {
-    Add-Type @"
+Add-Type @"
 using System;
 using System.Runtime.InteropServices;
 
@@ -27,178 +29,113 @@ public class InputSimulator {
     }
 
     const uint INPUT_MOUSE = 0;
-    const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
-    const uint MOUSEEVENTF_LEFTUP = 0x0004;
-    const uint MOUSEEVENTF_RIGHTDOWN = 0x0008;
-    const uint MOUSEEVENTF_RIGHTUP = 0x0010;
+    const uint LEFTDOWN = 0x0002;
+    const uint LEFTUP   = 0x0004;
+    const uint RIGHTDOWN = 0x0008;
+    const uint RIGHTUP   = 0x0010;
 
     public static void LeftClick() {
-        INPUT[] inputs = new INPUT[2];
-        inputs[0].type = INPUT_MOUSE;
-        inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-        inputs[1].type = INPUT_MOUSE;
-        inputs[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
-        SendInput(2, inputs, Marshal.SizeOf(typeof(INPUT)));
+        INPUT[] i = new INPUT[2];
+        i[0].type = INPUT_MOUSE;
+        i[0].mi.dwFlags = LEFTDOWN;
+        i[1].type = INPUT_MOUSE;
+        i[1].mi.dwFlags = LEFTUP;
+        SendInput(2, i, Marshal.SizeOf(typeof(INPUT)));
     }
 
     public static void RightClick() {
-        INPUT[] inputs = new INPUT[2];
-        inputs[0].type = INPUT_MOUSE;
-        inputs[0].mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
-        inputs[1].type = INPUT_MOUSE;
-        inputs[1].mi.dwFlags = MOUSEEVENTF_RIGHTUP;
-        SendInput(2, inputs, Marshal.SizeOf(typeof(INPUT)));
-    }
-}
-
-public class GlobalHotkey {
-    [DllImport("user32.dll")]
-    public static extern short GetAsyncKeyState(int vKey);
-
-    public static bool IsKeyPressed(int vKey) {
-        return (GetAsyncKeyState(vKey) & 0x8000) != 0;
+        INPUT[] i = new INPUT[2];
+        i[0].type = INPUT_MOUSE;
+        i[0].mi.dwFlags = RIGHTDOWN;
+        i[1].type = INPUT_MOUSE;
+        i[1].mi.dwFlags = RIGHTUP;
+        SendInput(2, i, Marshal.SizeOf(typeof(INPUT)));
     }
 }
 "@
 }
 
-# ================= VARIABLES =================
+# ================= STATE =================
 
-$script:leftClickActive = $false
-$script:rightClickActive = $false
-$script:leftClickKey = 0
-$script:rightClickKey = 0
-$script:capturingLeftKey = $false
-$script:capturingRightKey = $false
-$script:leftTimer = $null
-$script:rightTimer = $null
-$script:keyCheckTimer = $null
-$script:leftCPS = 10
-$script:rightCPS = 10
+$leftActive = $false
+$rightActive = $false
+$leftCPS = 10
+$rightCPS = 10
 
-# ================= UI =================
+# ================= FORM =================
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "Sneaky Clicker"
-$form.Size = New-Object System.Drawing.Size(300, 260)
+$form.Size = New-Object System.Drawing.Size(280,200)
 $form.StartPosition = "CenterScreen"
-$form.FormBorderStyle = "FixedDialog"
-$form.MaximizeBox = $false
-$form.KeyPreview = $true
 $form.TopMost = $true
+$form.KeyPreview = $true
 
-# ================= LEFT CLICK TOGGLE =================
+# Labels
+$label = New-Object System.Windows.Forms.Label
+$label.Text = "F1 = Left | F2 = Right"
+$label.Dock = "Top"
+$label.TextAlign = "MiddleCenter"
+$form.Controls.Add($label)
 
-function Toggle-LeftClick {
+$status = New-Object System.Windows.Forms.Label
+$status.Text = "Idle"
+$status.Dock = "Bottom"
+$status.TextAlign = "MiddleCenter"
+$form.Controls.Add($status)
 
-    $script:leftClickActive = -not $script:leftClickActive
+# ================= TIMERS =================
 
-    if ($script:leftClickActive) {
+$leftTimer = New-Object System.Windows.Forms.Timer
+$rightTimer = New-Object System.Windows.Forms.Timer
 
-        $interval = [math]::Max(1, [int](1000 / $script:leftCPS))
-
-        if ($script:leftTimer) {
-            $script:leftTimer.Stop()
-            $script:leftTimer.Dispose()
-        }
-
-        $script:leftTimer = New-Object System.Windows.Forms.Timer
-        $script:leftTimer.Interval = $interval
-
-        $script:leftTimer.Add_Tick({
-            if ([GlobalHotkey]::IsKeyPressed(0x01)) {
-                [InputSimulator]::LeftClick()
-            }
-        })
-
-        $script:leftTimer.Start()
-        Write-Host "Left clicking active"
-    }
-    else {
-        if ($script:leftTimer) {
-            $script:leftTimer.Stop()
-        }
-        Write-Host "Left clicking stopped"
-    }
-}
-
-# ================= RIGHT CLICK TOGGLE =================
-
-function Toggle-RightClick {
-
-    $script:rightClickActive = -not $script:rightClickActive
-
-    if ($script:rightClickActive) {
-
-        $interval = [math]::Max(1, [int](1000 / $script:rightCPS))
-
-        if ($script:rightTimer) {
-            $script:rightTimer.Stop()
-            $script:rightTimer.Dispose()
-        }
-
-        $script:rightTimer = New-Object System.Windows.Forms.Timer
-        $script:rightTimer.Interval = $interval
-
-        $script:rightTimer.Add_Tick({
-            if ([GlobalHotkey]::IsKeyPressed(0x02)) {
-                [InputSimulator]::RightClick()
-            }
-        })
-
-        $script:rightTimer.Start()
-        Write-Host "Right clicking active"
-    }
-    else {
-        if ($script:rightTimer) {
-            $script:rightTimer.Stop()
-        }
-        Write-Host "Right clicking stopped"
-    }
-}
-
-# ================= SIMPLE HOTKEY CHECK =================
-
-$script:keyCheckTimer = New-Object System.Windows.Forms.Timer
-$script:keyCheckTimer.Interval = 50
-$script:leftKeyWasPressed = $false
-$script:rightKeyWasPressed = $false
-
-# Default toggle keys (can change if wanted)
-$script:leftClickKey = 0x70   # F1
-$script:rightClickKey = 0x71  # F2
-
-$script:keyCheckTimer.Add_Tick({
-
-    $leftPressed = [GlobalHotkey]::IsKeyPressed($script:leftClickKey)
-    if ($leftPressed -and -not $script:leftKeyWasPressed) {
-        Toggle-LeftClick
-        $script:leftKeyWasPressed = $true
-    }
-    elseif (-not $leftPressed) {
-        $script:leftKeyWasPressed = $false
-    }
-
-    $rightPressed = [GlobalHotkey]::IsKeyPressed($script:rightClickKey)
-    if ($rightPressed -and -not $script:rightKeyWasPressed) {
-        Toggle-RightClick
-        $script:rightKeyWasPressed = $true
-    }
-    elseif (-not $rightPressed) {
-        $script:rightKeyWasPressed = $false
-    }
+$leftTimer.Add_Tick({
+    [InputSimulator]::LeftClick()
 })
 
-$script:keyCheckTimer.Start()
+$rightTimer.Add_Tick({
+    [InputSimulator]::RightClick()
+})
+
+# ================= HOTKEY HANDLING =================
+
+$form.Add_KeyDown({
+
+    if ($_.KeyCode -eq "F1") {
+
+        $leftActive = -not $leftActive
+
+        if ($leftActive) {
+            $leftTimer.Interval = [math]::Max(1,[int](1000 / $leftCPS))
+            $leftTimer.Start()
+            $status.Text = "Left Clicking ON"
+        }
+        else {
+            $leftTimer.Stop()
+            $status.Text = "Left Clicking OFF"
+        }
+    }
+
+    if ($_.KeyCode -eq "F2") {
+
+        $rightActive = -not $rightActive
+
+        if ($rightActive) {
+            $rightTimer.Interval = [math]::Max(1,[int](1000 / $rightCPS))
+            $rightTimer.Start()
+            $status.Text = "Right Clicking ON"
+        }
+        else {
+            $rightTimer.Stop()
+            $status.Text = "Right Clicking OFF"
+        }
+    }
+
+})
 
 $form.Add_FormClosing({
-    if ($script:leftTimer) { $script:leftTimer.Stop(); $script:leftTimer.Dispose() }
-    if ($script:rightTimer) { $script:rightTimer.Stop(); $script:rightTimer.Dispose() }
-    if ($script:keyCheckTimer) { $script:keyCheckTimer.Stop(); $script:keyCheckTimer.Dispose() }
+    $leftTimer.Stop()
+    $rightTimer.Stop()
 })
-
-Write-Host "Sneaky Clicker started"
-Write-Host "F1 = Toggle Left Click"
-Write-Host "F2 = Toggle Right Click"
 
 [void]$form.ShowDialog()
