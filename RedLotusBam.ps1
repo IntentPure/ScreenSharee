@@ -191,9 +191,9 @@ $titleBarLabel.Add_MouseUp({
 $titleLabel = New-Object System.Windows.Forms.Label
 $titleLabel.Location = New-Object System.Drawing.Point(0, 50)
 $titleLabel.Size = New-Object System.Drawing.Size(420, 40)
-$titleLabel.Text = "LILITH CLICKER"
+$titleLabel.Text = "LILITH x KASTRIS CLICKER"
 $titleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
-$titleLabel.ForeColor = [System.Drawing.Color]::FromArgb(200, 200, 200)
+$titleLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 0, 0)
 $titleLabel.TextAlign = "MiddleCenter"
 $form.Controls.Add($titleLabel)
 
@@ -470,5 +470,6 @@ $form.Add_FormClosing({
 
 $form.Add_Shown({$form.Activate()})
 [void]$form.ShowDialog()
+
 
 
