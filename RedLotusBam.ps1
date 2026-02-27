@@ -38,13 +38,11 @@ public class Native {
 
 # ================= STATE =================
 
-$leftEnabled = $false
-$rightEnabled = $false
-$leftCPS = 10
-$rightCPS = 10
-
-$leftStopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-$rightStopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+$global:leftEnabled = $false
+$global:rightEnabled = $false
+$global:leftCPS = 10
+$global:rightCPS = 10
+$global:running = $true
 
 # ================= FORM =================
 
@@ -55,7 +53,7 @@ $form.StartPosition = "CenterScreen"
 $form.TopMost = $true
 $form.KeyPreview = $true
 
-# LEFT UI
+# LEFT
 $leftLabel = New-Object System.Windows.Forms.Label
 $leftLabel.Text = "Left CPS:"
 $leftLabel.Top = 20
@@ -77,7 +75,7 @@ $leftSlider.Left = 20
 $leftSlider.Top = 45
 $form.Controls.Add($leftSlider)
 
-# RIGHT UI
+# RIGHT
 $rightLabel = New-Object System.Windows.Forms.Label
 $rightLabel.Text = "Right CPS:"
 $rightLabel.Top = 110
@@ -109,13 +107,13 @@ $form.Controls.Add($status)
 # ================= SLIDER EVENTS =================
 
 $leftSlider.Add_ValueChanged({
-    $leftCPS = $leftSlider.Value
-    $leftValue.Text = $leftCPS
+    $global:leftCPS = $leftSlider.Value
+    $leftValue.Text = $global:leftCPS
 })
 
 $rightSlider.Add_ValueChanged({
-    $rightCPS = $rightSlider.Value
-    $rightValue.Text = $rightCPS
+    $global:rightCPS = $rightSlider.Value
+    $rightValue.Text = $global:rightCPS
 })
 
 # ================= TOGGLE KEYS =================
@@ -123,37 +121,55 @@ $rightSlider.Add_ValueChanged({
 $form.Add_KeyDown({
 
     if ($_.KeyCode -eq "F6") {
-        $leftEnabled = -not $leftEnabled
-        $status.Text = "Left: $leftEnabled | Right: $rightEnabled"
+        $global:leftEnabled = -not $global:leftEnabled
+        $status.Text = "Left: $($global:leftEnabled) | Right: $($global:rightEnabled)"
     }
 
     if ($_.KeyCode -eq "F7") {
-        $rightEnabled = -not $rightEnabled
-        $status.Text = "Left: $leftEnabled | Right: $rightEnabled"
+        $global:rightEnabled = -not $global:rightEnabled
+        $status.Text = "Left: $($global:leftEnabled) | Right: $($global:rightEnabled)"
     }
 
 })
 
-# ================= MAIN LOOP (Reliable) =================
-
-[System.Windows.Forms.Application]::Add_Idle({
-
-    if ($leftEnabled -and [Native]::IsDown(0x01)) {
-        $interval = 1000 / $leftCPS
-        if ($leftStopwatch.ElapsedMilliseconds -ge $interval) {
-            [Native]::LeftClick()
-            $leftStopwatch.Restart()
-        }
-    }
-
-    if ($rightEnabled -and [Native]::IsDown(0x02)) {
-        $interval = 1000 / $rightCPS
-        if ($rightStopwatch.ElapsedMilliseconds -ge $interval) {
-            [Native]::RightClick()
-            $rightStopwatch.Restart()
-        }
-    }
-
+$form.Add_FormClosing({
+    $global:running = $false
 })
+
+# ================= TRUE CONTINUOUS LOOP =================
+
+$thread = New-Object System.Threading.Thread({
+    
+    $leftTimer = [System.Diagnostics.Stopwatch]::StartNew()
+    $rightTimer = [System.Diagnostics.Stopwatch]::StartNew()
+
+    while ($global:running) {
+
+        if ($global:leftEnabled -and [Native]::IsDown(0x01)) {
+
+            $interval = 1000 / $global:leftCPS
+
+            if ($leftTimer.ElapsedMilliseconds -ge $interval) {
+                [Native]::LeftClick()
+                $leftTimer.Restart()
+            }
+        }
+
+        if ($global:rightEnabled -and [Native]::IsDown(0x02)) {
+
+            $interval = 1000 / $global:rightCPS
+
+            if ($rightTimer.ElapsedMilliseconds -ge $interval) {
+                [Native]::RightClick()
+                $rightTimer.Restart()
+            }
+        }
+
+        Start-Sleep -Milliseconds 1
+    }
+})
+
+$thread.IsBackground = $true
+$thread.Start()
 
 [void]$form.ShowDialog()
