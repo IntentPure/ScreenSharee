@@ -193,7 +193,7 @@ $titleLabel.Location = New-Object System.Drawing.Point(0, 50)
 $titleLabel.Size = New-Object System.Drawing.Size(420, 40)
 $titleLabel.Text = "LILITH x KASTRIS CLICKER"
 $titleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
-$titleLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 0, 0)
+$titleLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $titleLabel.TextAlign = "MiddleCenter"
 $form.Controls.Add($titleLabel)
 
@@ -233,9 +233,9 @@ $statusPanel.Controls.Add($statusLabel)
 $hotkeyLabel = New-Object System.Windows.Forms.Label
 $hotkeyLabel.Location = New-Object System.Drawing.Point(10, 45)
 $hotkeyLabel.Size = New-Object System.Drawing.Size(300, 25)
-$hotkeyLabel.Text = "Hotkey: F6 | Made by lily"
+$hotkeyLabel.Text = "Hotkey: F6 | Made by lily x kastris"
 $hotkeyLabel.Font = New-Object System.Drawing.Font("Segoe UI", 8)
-$hotkeyLabel.ForeColor = [System.Drawing.Color]::FromArgb(100, 100, 100)
+$hotkeyLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $hotkeyLabel.TextAlign = "MiddleCenter"
 $statusPanel.Controls.Add($hotkeyLabel)
 
@@ -246,7 +246,7 @@ $toggleButton.Size = New-Object System.Drawing.Size(200, 50)
 $toggleButton.Text = "START (F6)"
 $toggleButton.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
 $toggleButton.BackColor = [System.Drawing.Color]::FromArgb(80, 80, 80)
-$toggleButton.ForeColor = [System.Drawing.Color]::White
+$toggleButton.ForeColor = [System.Drawing.Color]::Green
 $toggleButton.FlatStyle = "Flat"
 $toggleButton.FlatAppearance.BorderSize = 0
 $toggleButton.Cursor = [System.Windows.Forms.Cursors]::Hand
@@ -470,6 +470,7 @@ $form.Add_FormClosing({
 
 $form.Add_Shown({$form.Activate()})
 [void]$form.ShowDialog()
+
 
 
 
