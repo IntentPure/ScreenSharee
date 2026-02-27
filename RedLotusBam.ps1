@@ -1,16 +1,18 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# ================= NATIVE CLICK =================
+# ================= CLICK + KEY =================
 
-if (-not ([System.Management.Automation.PSTypeName]'InputSimulator').Type) {
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
 
-public class InputSimulator {
+public class Native {
     [DllImport("user32.dll")]
     static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+    [DllImport("user32.dll")]
+    public static extern short GetAsyncKeyState(int vKey);
 
     [StructLayout(LayoutKind.Sequential)]
     struct INPUT {
@@ -29,8 +31,8 @@ public class InputSimulator {
     }
 
     const uint INPUT_MOUSE = 0;
-    const uint LEFTDOWN  = 0x0002;
-    const uint LEFTUP    = 0x0004;
+    const uint LEFTDOWN = 0x0002;
+    const uint LEFTUP   = 0x0004;
     const uint RIGHTDOWN = 0x0008;
     const uint RIGHTUP   = 0x0010;
 
@@ -51,17 +53,6 @@ public class InputSimulator {
         i[1].mi.dwFlags = RIGHTUP;
         SendInput(2, i, Marshal.SizeOf(typeof(INPUT)));
     }
-}
-"@
-}
-
-Add-Type @"
-using System;
-using System.Runtime.InteropServices;
-
-public class KeyState {
-    [DllImport("user32.dll")]
-    public static extern short GetAsyncKeyState(int vKey);
 
     public static bool IsDown(int key) {
         return (GetAsyncKeyState(key) & 0x8000) != 0;
@@ -75,6 +66,7 @@ $global:leftEnabled = $false
 $global:rightEnabled = $false
 $global:leftCPS = 10
 $global:rightCPS = 10
+$global:running = $true
 
 # ================= FORM =================
 
@@ -85,8 +77,7 @@ $form.StartPosition = "CenterScreen"
 $form.TopMost = $true
 $form.KeyPreview = $true
 
-# -------- LEFT SECTION --------
-
+# Left UI
 $leftLabel = New-Object System.Windows.Forms.Label
 $leftLabel.Text = "Left CPS:"
 $leftLabel.Top = 20
@@ -108,8 +99,7 @@ $leftSlider.Left = 20
 $leftSlider.Top = 45
 $form.Controls.Add($leftSlider)
 
-# -------- RIGHT SECTION --------
-
+# Right UI
 $rightLabel = New-Object System.Windows.Forms.Label
 $rightLabel.Text = "Right CPS:"
 $rightLabel.Top = 110
@@ -131,8 +121,6 @@ $rightSlider.Left = 20
 $rightSlider.Top = 135
 $form.Controls.Add($rightSlider)
 
-# -------- STATUS --------
-
 $status = New-Object System.Windows.Forms.Label
 $status.Text = "F6 = Toggle Left | F7 = Toggle Right"
 $status.Dock = "Bottom"
@@ -140,70 +128,70 @@ $status.Height = 30
 $status.TextAlign = "MiddleCenter"
 $form.Controls.Add($status)
 
-# ================= TIMERS =================
-
-$leftTimer = New-Object System.Windows.Forms.Timer
-$rightTimer = New-Object System.Windows.Forms.Timer
-
-$leftTimer.Add_Tick({
-    if ($global:leftEnabled -and [KeyState]::IsDown(0x01)) {
-        [InputSimulator]::LeftClick()
-    }
-})
-
-$rightTimer.Add_Tick({
-    if ($global:rightEnabled -and [KeyState]::IsDown(0x02)) {
-        [InputSimulator]::RightClick()
-    }
-})
-
-# ================= EVENTS =================
+# ================= SLIDER EVENTS =================
 
 $leftSlider.Add_ValueChanged({
     $global:leftCPS = $leftSlider.Value
     $leftValue.Text = $global:leftCPS
-    $leftTimer.Interval = [math]::Max(1,[int](1000 / $global:leftCPS))
 })
 
 $rightSlider.Add_ValueChanged({
     $global:rightCPS = $rightSlider.Value
     $rightValue.Text = $global:rightCPS
-    $rightTimer.Interval = [math]::Max(1,[int](1000 / $global:rightCPS))
 })
+
+# ================= TOGGLE KEYS =================
 
 $form.Add_KeyDown({
 
     if ($_.KeyCode -eq "F6") {
         $global:leftEnabled = -not $global:leftEnabled
-        if ($global:leftEnabled) {
-            $leftTimer.Interval = [math]::Max(1,[int](1000 / $global:leftCPS))
-            $leftTimer.Start()
-            $status.Text = "Left ENABLED (Hold Left Mouse)"
-        }
-        else {
-            $leftTimer.Stop()
-            $status.Text = "Left DISABLED"
-        }
+        $status.Text = "Left: $($global:leftEnabled) | Right: $($global:rightEnabled)"
     }
 
     if ($_.KeyCode -eq "F7") {
         $global:rightEnabled = -not $global:rightEnabled
-        if ($global:rightEnabled) {
-            $rightTimer.Interval = [math]::Max(1,[int](1000 / $global:rightCPS))
-            $rightTimer.Start()
-            $status.Text = "Right ENABLED (Hold Right Mouse)"
-        }
-        else {
-            $rightTimer.Stop()
-            $status.Text = "Right DISABLED"
-        }
+        $status.Text = "Left: $($global:leftEnabled) | Right: $($global:rightEnabled)"
     }
 
 })
 
 $form.Add_FormClosing({
-    $leftTimer.Stop()
-    $rightTimer.Stop()
+    $global:running = $false
+})
+
+# ================= HIGH PRECISION CLICK LOOP =================
+
+$job = [System.Threading.Tasks.Task]::Run({
+
+    $leftTimer = [System.Diagnostics.Stopwatch]::StartNew()
+    $rightTimer = [System.Diagnostics.Stopwatch]::StartNew()
+
+    while ($global:running) {
+
+        if ($global:leftEnabled -and [Native]::IsDown(0x01)) {
+
+            $interval = 1000 / $global:leftCPS
+
+            if ($leftTimer.ElapsedMilliseconds -ge $interval) {
+                [Native]::LeftClick()
+                $leftTimer.Restart()
+            }
+        }
+
+        if ($global:rightEnabled -and [Native]::IsDown(0x02)) {
+
+            $interval = 1000 / $global:rightCPS
+
+            if ($rightTimer.ElapsedMilliseconds -ge $interval) {
+                [Native]::RightClick()
+                $rightTimer.Restart()
+            }
+        }
+
+        Start-Sleep -Milliseconds 1
+    }
+
 })
 
 [void]$form.ShowDialog()
