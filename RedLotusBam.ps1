@@ -2,7 +2,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 Write-Host @"
-Made with love by lily<3 (Edited a bit by kastris)
+Made with love by lily<3 <Edited a bit by kastris>
 "@ -ForegroundColor Red
 
 if (-not ([System.Management.Automation.PSTypeName]'Win32').Type) {
@@ -470,4 +470,5 @@ $form.Add_FormClosing({
 
 $form.Add_Shown({$form.Activate()})
 [void]$form.ShowDialog()
+
 
