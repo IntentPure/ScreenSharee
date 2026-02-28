@@ -86,7 +86,7 @@ $form.Controls.Add($titleBar)
 $titleBarLabel = New-Object System.Windows.Forms.Label
 $titleBarLabel.Location = New-Object System.Drawing.Point(10, 0)
 $titleBarLabel.Size = New-Object System.Drawing.Size(300, 35)
-$titleBarLabel.Text = "Lilith x kastris Private Revamp"
+$titleBarLabel.Text = "Lilith Clicker Revamped by kastris"
 $titleBarLabel.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
 $titleBarLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $titleBarLabel.TextAlign = "MiddleLeft"
@@ -470,6 +470,7 @@ $form.Add_FormClosing({
 
 $form.Add_Shown({$form.Activate()})
 [void]$form.ShowDialog()
+
 
 
 
