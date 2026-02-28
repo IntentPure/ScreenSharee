@@ -3,7 +3,7 @@ Add-Type -AssemblyName System.Drawing
 
 Write-Host @"
 Made with love by lily<3 <Edited a bit by kastris>
-"@ -ForegroundColor Red
+"@ -ForegroundColor Green
 
 if (-not ([System.Management.Automation.PSTypeName]'Win32').Type) {
     Add-Type @"
@@ -29,12 +29,12 @@ public class Win32 {
 }
 
 $script:isEnabled = $false
-$script:cps = 10
+$script:cps = 18
 $script:randomization = 0
 $script:mainTimer = $null
 $script:hotkeyTimer = $null
 $script:hotkeyVK = 0x75  
-$script:hotkeyName = "F6"
+$script:hotkeyName = "F8"
 $script:leftLastClick = [DateTime]::MinValue
 $script:rightLastClick = [DateTime]::MinValue
 $script:capturingHotkey = $false
@@ -59,7 +59,7 @@ function Invoke-Click {
 
 # Main Form
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Lilith x kastris Clicker"
+$form.Text = "-------EZZZ BYPASS-------"
 $form.Size = New-Object System.Drawing.Size(420, 520)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "None"
@@ -470,6 +470,7 @@ $form.Add_FormClosing({
 
 $form.Add_Shown({$form.Activate()})
 [void]$form.ShowDialog()
+
 
 
 
