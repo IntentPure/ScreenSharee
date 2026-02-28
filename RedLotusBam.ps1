@@ -63,7 +63,7 @@ $form.Text = "Lilith x kastris Clicker"
 $form.Size = New-Object System.Drawing.Size(420, 520)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "None"
-$form.BackColor = [System.Drawing.Color]::FromArgb(32, 32, 32)
+$form.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
 $form.ForeColor = [System.Drawing.Color]::Red
 
 # Variables for dragging
@@ -88,7 +88,7 @@ $titleBarLabel.Location = New-Object System.Drawing.Point(10, 0)
 $titleBarLabel.Size = New-Object System.Drawing.Size(300, 35)
 $titleBarLabel.Text = "Lilith x kastris Clicker"
 $titleBarLabel.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-$titleBarLabel.ForeColor = [System.Drawing.Color]::FromArgb(180, 180, 180)
+$titleBarLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $titleBarLabel.TextAlign = "MiddleLeft"
 $titleBarLabel.Cursor = [System.Windows.Forms.Cursors]::SizeAll
 $titleBar.Controls.Add($titleBarLabel)
@@ -99,7 +99,7 @@ $minimizeButton.Location = New-Object System.Drawing.Point(340, 0)
 $minimizeButton.Size = New-Object System.Drawing.Size(40, 35)
 $minimizeButton.Text = "_"
 $minimizeButton.Font = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold)
-$minimizeButton.ForeColor = [System.Drawing.Color]::FromArgb(180, 180, 180)
+$minimizeButton.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $minimizeButton.BackColor = [System.Drawing.Color]::FromArgb(24, 24, 24)
 $minimizeButton.FlatStyle = "Flat"
 $minimizeButton.FlatAppearance.BorderSize = 0
@@ -121,7 +121,7 @@ $closeButton.Location = New-Object System.Drawing.Point(380, 0)
 $closeButton.Size = New-Object System.Drawing.Size(40, 35)
 $closeButton.Text = "X"
 $closeButton.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-$closeButton.ForeColor = [System.Drawing.Color]::FromArgb(180, 180, 180)
+$closeButton.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $closeButton.BackColor = [System.Drawing.Color]::FromArgb(24, 24, 24)
 $closeButton.FlatStyle = "Flat"
 $closeButton.FlatAppearance.BorderSize = 0
@@ -203,7 +203,7 @@ $subtitleLabel.Location = New-Object System.Drawing.Point(0, 90)
 $subtitleLabel.Size = New-Object System.Drawing.Size(420, 20)
 $subtitleLabel.Text = "--- <3 ---"
 $subtitleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 9)
-$subtitleLabel.ForeColor = [System.Drawing.Color]::FromArgb(120, 120, 120)
+$subtitleLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $subtitleLabel.TextAlign = "MiddleCenter"
 $form.Controls.Add($subtitleLabel)
 
@@ -211,14 +211,14 @@ $form.Controls.Add($subtitleLabel)
 $statusPanel = New-Object System.Windows.Forms.Panel
 $statusPanel.Location = New-Object System.Drawing.Point(50, 130)
 $statusPanel.Size = New-Object System.Drawing.Size(320, 80)
-$statusPanel.BackColor = [System.Drawing.Color]::FromArgb(24, 24, 24)
+$statusPanel.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
 $form.Controls.Add($statusPanel)
 
 # Status Indicator
 $statusIndicator = New-Object System.Windows.Forms.Panel
 $statusIndicator.Location = New-Object System.Drawing.Point(125, 15)
 $statusIndicator.Size = New-Object System.Drawing.Size(12, 12)
-$statusIndicator.BackColor = [System.Drawing.Color]::FromArgb(180, 180, 180)
+$statusIndicator.BackColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $statusPanel.Controls.Add($statusIndicator)
 
 $statusLabel = New-Object System.Windows.Forms.Label
@@ -226,7 +226,7 @@ $statusLabel.Location = New-Object System.Drawing.Point(145, 10)
 $statusLabel.Size = New-Object System.Drawing.Size(150, 22)
 $statusLabel.Text = "DISABLED"
 $statusLabel.Font = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold)
-$statusLabel.ForeColor = [System.Drawing.Color]::FromArgb(180, 180, 180)
+$statusLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $statusLabel.TextAlign = "MiddleLeft"
 $statusPanel.Controls.Add($statusLabel)
 
@@ -245,8 +245,8 @@ $toggleButton.Location = New-Object System.Drawing.Point(110, 230)
 $toggleButton.Size = New-Object System.Drawing.Size(200, 50)
 $toggleButton.Text = "START (F6)"
 $toggleButton.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
-$toggleButton.BackColor = [System.Drawing.Color]::FromArgb(80, 80, 80)
-$toggleButton.ForeColor = [System.Drawing.Color]::Green
+$toggleButton.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
+$toggleButton.ForeColor = [System.Drawing.Color]FromArgb(43, 255, 0)
 $toggleButton.FlatStyle = "Flat"
 $toggleButton.FlatAppearance.BorderSize = 0
 $toggleButton.Cursor = [System.Windows.Forms.Cursors]::Hand
@@ -255,18 +255,18 @@ $toggleFunction = {
     $script:isEnabled = -not $script:isEnabled
     if ($script:isEnabled) {
         $toggleButton.Text = "STOP ($($script:hotkeyName))"
-        $toggleButton.BackColor = [System.Drawing.Color]::FromArgb(140, 140, 140)
+        $toggleButton.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
         $statusLabel.Text = "ACTIVE"
-        $statusLabel.ForeColor = [System.Drawing.Color]::FromArgb(220, 220, 220)
-        $statusIndicator.BackColor = [System.Drawing.Color]::FromArgb(100, 220, 120)
+        $statusLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
+        $statusIndicator.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
         $script:leftLastClick = [DateTime]::MinValue
         $script:rightLastClick = [DateTime]::MinValue
         $script:mainTimer.Start()
     } else {
         $toggleButton.Text = "START ($($script:hotkeyName))"
-        $toggleButton.BackColor = [System.Drawing.Color]::FromArgb(80, 80, 80)
+        $toggleButton.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
         $statusLabel.Text = "DISABLED"
-        $statusLabel.ForeColor = [System.Drawing.Color]::FromArgb(180, 180, 180)
+        $statusLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
         $statusIndicator.BackColor = [System.Drawing.Color]::FromArgb(180, 180, 180)
         $script:mainTimer.Stop()
     }
@@ -279,7 +279,7 @@ $form.Controls.Add($toggleButton)
 $separator1 = New-Object System.Windows.Forms.Panel
 $separator1.Location = New-Object System.Drawing.Point(50, 300)
 $separator1.Size = New-Object System.Drawing.Size(320, 1)
-$separator1.BackColor = [System.Drawing.Color]::FromArgb(60, 60, 60)
+$separator1.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
 $form.Controls.Add($separator1)
 
 # Hotkey Group
@@ -288,7 +288,7 @@ $hotkeyGroupLabel.Location = New-Object System.Drawing.Point(50, 315)
 $hotkeyGroupLabel.Size = New-Object System.Drawing.Size(150, 22)
 $hotkeyGroupLabel.Text = "Toggle Hotkey"
 $hotkeyGroupLabel.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-$hotkeyGroupLabel.ForeColor = [System.Drawing.Color]::FromArgb(200, 200, 200)
+$hotkeyGroupLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $form.Controls.Add($hotkeyGroupLabel)
 
 $hotkeyTextbox = New-Object System.Windows.Forms.TextBox
@@ -296,14 +296,14 @@ $hotkeyTextbox.Location = New-Object System.Drawing.Point(220, 313)
 $hotkeyTextbox.Size = New-Object System.Drawing.Size(150, 28)
 $hotkeyTextbox.Text = "F6"
 $hotkeyTextbox.Font = New-Object System.Drawing.Font("Consolas", 11)
-$hotkeyTextbox.BackColor = [System.Drawing.Color]::FromArgb(48, 48, 48)
-$hotkeyTextbox.ForeColor = [System.Drawing.Color]::FromArgb(220, 220, 220)
+$hotkeyTextbox.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
+$hotkeyTextbox.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $hotkeyTextbox.BorderStyle = "FixedSingle"
 $hotkeyTextbox.ReadOnly = $true
 $hotkeyTextbox.TextAlign = "Center"
 $hotkeyTextbox.Add_Click({
     $hotkeyTextbox.Text = "Press key..."
-    $hotkeyTextbox.BackColor = [System.Drawing.Color]::FromArgb(70, 70, 70)
+    $hotkeyTextbox.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
     $script:capturingHotkey = $true
     $hotkeyTextbox.Focus()
 })
@@ -470,6 +470,7 @@ $form.Add_FormClosing({
 
 $form.Add_Shown({$form.Activate()})
 [void]$form.ShowDialog()
+
 
 
 
