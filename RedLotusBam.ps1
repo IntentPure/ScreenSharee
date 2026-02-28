@@ -315,8 +315,8 @@ $hotkeyTextbox.Add_KeyDown({
             $script:hotkeyVK = $vk
             $script:hotkeyName = $e.KeyCode.ToString()
             $hotkeyTextbox.Text = $script:hotkeyName
-            $hotkeyTextbox.BackColor = [System.Drawing.Color]::FromArgb(48, 48, 48)
-            $hotkeyLabel.Text = "Hotkey: $($script:hotkeyName) | Made by lily"
+            $hotkeyTextbox.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
+            $hotkeyLabel.Text = "Hotkey: $($script:hotkeyName) | Made by lily x kastris"
             $toggleButton.Text = if ($script:isEnabled) { "STOP ($($script:hotkeyName))" } else { "START ($($script:hotkeyName))" }
         }
         $script:capturingHotkey = $false
@@ -330,9 +330,9 @@ $form.Controls.Add($hotkeyTextbox)
 $cpsLabel = New-Object System.Windows.Forms.Label
 $cpsLabel.Location = New-Object System.Drawing.Point(50, 355)
 $cpsLabel.Size = New-Object System.Drawing.Size(200, 22)
-$cpsLabel.Text = "Clicks Per Second"
+$cpsLabel.Text = "CPS ADJUSTING"
 $cpsLabel.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-$cpsLabel.ForeColor = [System.Drawing.Color]::FromArgb(200, 200, 200)
+$cpsLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $form.Controls.Add($cpsLabel)
 
 $cpsValue = New-Object System.Windows.Forms.Label
@@ -340,7 +340,7 @@ $cpsValue.Location = New-Object System.Drawing.Point(320, 355)
 $cpsValue.Size = New-Object System.Drawing.Size(50, 22)
 $cpsValue.Text = "10"
 $cpsValue.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-$cpsValue.ForeColor = [System.Drawing.Color]::FromArgb(160, 160, 160)
+$cpsValue.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $cpsValue.TextAlign = "MiddleRight"
 $form.Controls.Add($cpsValue)
 
@@ -351,7 +351,7 @@ $cpsSlider.Minimum = 1
 $cpsSlider.Maximum = 50
 $cpsSlider.Value = 10
 $cpsSlider.TickFrequency = 5
-$cpsSlider.BackColor = [System.Drawing.Color]::FromArgb(32, 32, 32)
+$cpsSlider.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
 $cpsSlider.Add_ValueChanged({
     $script:cps = $cpsSlider.Value
     $cpsValue.Text = $script:cps.ToString()
@@ -364,7 +364,7 @@ $randLabel.Location = New-Object System.Drawing.Point(50, 425)
 $randLabel.Size = New-Object System.Drawing.Size(200, 22)
 $randLabel.Text = "Randomization"
 $randLabel.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-$randLabel.ForeColor = [System.Drawing.Color]::FromArgb(200, 200, 200)
+$randLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $form.Controls.Add($randLabel)
 
 $randValue = New-Object System.Windows.Forms.Label
@@ -372,7 +372,7 @@ $randValue.Location = New-Object System.Drawing.Point(305, 425)
 $randValue.Size = New-Object System.Drawing.Size(65, 22)
 $randValue.Text = "0%"
 $randValue.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-$randValue.ForeColor = [System.Drawing.Color]::FromArgb(160, 160, 160)
+$randValue.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $randValue.TextAlign = "MiddleRight"
 $form.Controls.Add($randValue)
 
@@ -383,7 +383,7 @@ $randSlider.Minimum = 0
 $randSlider.Maximum = 100
 $randSlider.Value = 0
 $randSlider.TickFrequency = 10
-$randSlider.BackColor = [System.Drawing.Color]::FromArgb(32, 32, 32)
+$randSlider.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
 $randSlider.Add_ValueChanged({
     $script:randomization = $randSlider.Value
     $randValue.Text = "$($script:randomization)%"
@@ -396,7 +396,7 @@ $debugLabel.Location = New-Object System.Drawing.Point(50, 495)
 $debugLabel.Size = New-Object System.Drawing.Size(320, 20)
 $debugLabel.Text = "Ready"
 $debugLabel.Font = New-Object System.Drawing.Font("Consolas", 8)
-$debugLabel.ForeColor = [System.Drawing.Color]::FromArgb(80, 80, 80)
+$debugLabel.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $form.Controls.Add($debugLabel)
 
 # Main Timer
@@ -470,6 +470,7 @@ $form.Add_FormClosing({
 
 $form.Add_Shown({$form.Activate()})
 [void]$form.ShowDialog()
+
 
 
 
