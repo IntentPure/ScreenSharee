@@ -246,7 +246,7 @@ $toggleButton.Size = New-Object System.Drawing.Size(200, 50)
 $toggleButton.Text = "START (F6)"
 $toggleButton.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
 $toggleButton.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
-$toggleButton.ForeColor = [System.Drawing.Color]::Green
+$toggleButton.ForeColor = [System.Drawing.Color]::FromArgb(43, 255, 0)
 $toggleButton.FlatStyle = "Flat"
 $toggleButton.FlatAppearance.BorderSize = 0
 $toggleButton.Cursor = [System.Windows.Forms.Cursors]::Hand
@@ -470,6 +470,7 @@ $form.Add_FormClosing({
 
 $form.Add_Shown({$form.Activate()})
 [void]$form.ShowDialog()
+
 
 
 
